@@ -27,7 +27,10 @@ $(BUILD)/global.o: global.cc global.h | $(BUILD)
 $(BUILD):
 	mkdir -p $(BUILD)
 
-.PHONY: clean
+.PHONY: test clean
+
+test: $(BUILD)/pl0c
+	cd tests && ./test.sh
 
 clean:
 	rm -rf $(BUILD)

@@ -1,0 +1,2 @@
+writeStr 'Hello world from ''PL/0''\n'
+.

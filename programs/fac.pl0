@@ -1,0 +1,23 @@
+{
+  Factorial
+}
+var z, n, f;
+
+begin
+  readInt into z;
+  if z > 0 then
+  begin
+    if z <= 20 then
+    begin
+      n := 0;
+      f := 1;
+      while n # z do { loop }
+      begin
+        n := n + 1;
+        f := f * n;
+        writeInt f;
+        writeChar 10;
+      end;
+    end;
+  end;
+end.
