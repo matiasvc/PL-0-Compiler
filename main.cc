@@ -2,7 +2,7 @@
 #include <cstdlib>
 
 #include "global.h"
-#include "lexer.h"
+#include "parser.h"
 #include "util.h"
 
 /*
@@ -25,52 +25,6 @@
  *              | number
  *              | "(" expression ")" .
  */
-
-/*** Parser ***/
-
-static void parse() {
-  while ((g.type = lex()) != 0) {
-    ++g.raw;
-    (void) fprintf(stdout, "%lu|%d\t", g.line, g.type);
-
-    switch (g.type) {
-      case TOK_IDENT:
-      case TOK_NUMBER:
-      case TOK_CONST:
-      case TOK_VAR:
-      case TOK_PROCEDURE:
-      case TOK_CALL:
-      case TOK_BEGIN:
-      case TOK_END:
-      case TOK_IF:
-      case TOK_THEN:
-      case TOK_WHILE:
-      case TOK_DO:
-      case TOK_ODD:
-        (void) fprintf(stdout, "%s (%c)", g.token, g.type);
-        break;
-      case TOK_DOT:
-      case TOK_EQUAL:
-      case TOK_COMMA:
-      case TOK_SEMICOLON:
-      case TOK_HASH:
-      case TOK_LESSTHAN:
-      case TOK_GREATERTHAN:
-      case TOK_PLUS:
-      case TOK_MINUS:
-      case TOK_MULTIPLY:
-      case TOK_DIVIDE:
-      case TOK_LPAREN:
-      case TOK_RPAREN:
-        (void) fputc(g.type, stdout);
-        break;
-      case TOK_ASSIGN:
-        (void) fputs(":=", stdout);
-    }
-    (void) fputc('\n', stdout);
-  }
-}
-
 
 /*** Main ***/
 

@@ -4,13 +4,16 @@ CXXFLAGS := -std=c++17 -g -Wall -Wextra
 LIBS := -lbsd
 
 BUILD := build
-OBJS := $(BUILD)/main.o $(BUILD)/lexer.o $(BUILD)/util.o $(BUILD)/global.o
+OBJS := $(BUILD)/main.o $(BUILD)/parser.o $(BUILD)/lexer.o $(BUILD)/util.o $(BUILD)/global.o
 
 $(BUILD)/pl0c: $(OBJS)
 	$(CXX) $(OBJS) $(LIBS) -o $(BUILD)/pl0c
 
-$(BUILD)/main.o: main.cc global.h lexer.h util.h | $(BUILD)
+$(BUILD)/main.o: main.cc global.h parser.h util.h | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c main.cc -o $(BUILD)/main.o
+
+$(BUILD)/parser.o: parser.cc parser.h global.h lexer.h | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c parser.cc -o $(BUILD)/parser.o
 
 $(BUILD)/lexer.o: lexer.cc lexer.h global.h util.h | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c lexer.cc -o $(BUILD)/lexer.o
