@@ -1,31 +1,24 @@
 CXX := clang++
 
-CXXFLAGS := -std=c++17 -g -Wall -Wextra
+# -MMD -MP makes the compiler emit .d dependency files so header changes
+# trigger rebuilds without hand-maintained dependency lists.
+CXXFLAGS := -std=c++17 -g -Wall -Wextra -MMD -MP
 LIBS := -lbsd
 
 BUILD := build
-OBJS := $(BUILD)/main.o $(BUILD)/parser.o $(BUILD)/lexer.o $(BUILD)/util.o $(BUILD)/global.o
+SRCS := $(wildcard *.cc)
+OBJS := $(SRCS:%.cc=$(BUILD)/%.o)
 
 $(BUILD)/pl0c: $(OBJS)
-	$(CXX) $(OBJS) $(LIBS) -o $(BUILD)/pl0c
+	$(CXX) $(OBJS) $(LIBS) -o $@
 
-$(BUILD)/main.o: main.cc global.h parser.h util.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -c main.cc -o $(BUILD)/main.o
-
-$(BUILD)/parser.o: parser.cc parser.h global.h lexer.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -c parser.cc -o $(BUILD)/parser.o
-
-$(BUILD)/lexer.o: lexer.cc lexer.h global.h util.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -c lexer.cc -o $(BUILD)/lexer.o
-
-$(BUILD)/util.o: util.cc util.h global.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -c util.cc -o $(BUILD)/util.o
-
-$(BUILD)/global.o: global.cc global.h | $(BUILD)
-	$(CXX) $(CXXFLAGS) -c global.cc -o $(BUILD)/global.o
+$(BUILD)/%.o: %.cc | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD):
 	mkdir -p $(BUILD)
+
+-include $(OBJS:.o=.d)
 
 .PHONY: test clean
 
