@@ -9,6 +9,7 @@ struct Globals {
   int type = 0;           // Type of the most recent token.
   int depth = 0;          // Current recursion depth
   size_t line = 1;        // Current line number, starting at 1.
+  bool proc = false;
 };
 
 // The single instance, defined in global.cc.

@@ -4,6 +4,7 @@
 #include "global.h"
 #include "parser.h"
 #include "util.h"
+#include "symtable.h"
 
 /*
  * pl0c -- PL/0 compiler.
@@ -39,6 +40,8 @@ int main(int argc, char** argv) {
 
   readin(argv[1]);
   startp = g.raw;
+
+  init_sym_table();
 
   parse();
 

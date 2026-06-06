@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cstdarg>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -58,4 +59,12 @@ void readin(char* file) {
   g.raw[st.st_size] = '\0';
 
   (void) close(fd);
+}
+
+void aout(const char* fmt, ...) {
+  va_list ap;
+
+  va_start(ap, fmt);
+  (void) vfprintf(stdout, fmt, ap);
+  va_end(ap);
 }

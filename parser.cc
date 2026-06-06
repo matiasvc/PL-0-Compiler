@@ -1,10 +1,13 @@
 #include "parser.h"
 
 #include <cstdio>
+#include <cstring>
 
 #include "global.h"
 #include "lexer.h"
 #include "util.h"
+#include "codegen.h"
+#include "symtable.h"
 
 
 void next() {
@@ -27,13 +30,35 @@ void block() {
 
   if (g.type == TOK_CONST) {
     expect(TOK_CONST);
+
+    if (g.type == TOK_IDENT) { 
+      cg_const();
+    }
     expect(TOK_IDENT);
+
     expect(TOK_EQUAL);
+
+
+    if (g.type == TOK_NUMBER) { 
+      cg_symbol();
+      cg_semicolon();
+    }
     expect(TOK_NUMBER);
     while (g.type == TOK_COMMA) {
       expect(TOK_COMMA);
+
+      if (g.type == TOK_IDENT) {
+        add_symbol(TOK_CONST);
+        cg_const();
+      }
       expect(TOK_IDENT);
+
       expect(TOK_EQUAL);
+
+      if (g.type == TOK_NUMBER) {
+        cg_symbol();
+        cg_semicolon();
+      }
       expect(TOK_NUMBER);
     }
     expect(TOK_SEMICOLON);
@@ -41,25 +66,49 @@ void block() {
 
   if (g.type == TOK_VAR) {
     expect(TOK_VAR);
+    if (g.type == TOK_IDENT) {
+      add_symbol(TOK_VAR);
+      cg_var();
+    }
     expect(TOK_IDENT);
     while (g.type == TOK_COMMA) {
       expect(TOK_COMMA);
+      if (g.type == TOK_IDENT) {
+        add_symbol(TOK_VAR);
+        cg_var();
+      }
       expect(TOK_IDENT);
     }
     expect(TOK_SEMICOLON);
+    cg_crlf();
   }
 
   while (g.type == TOK_PROCEDURE) {
+    g.proc = true;
+
     expect(TOK_PROCEDURE);
+    if (g.type == TOK_IDENT) {
+      add_symbol(TOK_PROCEDURE);
+      cg_procedure();
+    }
     expect(TOK_IDENT);
     expect(TOK_SEMICOLON);
 
     block();
 
     expect(TOK_SEMICOLON);
+
+    g.proc = false;
+    destroy_symbols();
+  }
+
+  if (!g.proc) {
+    cg_procedure();
   }
 
   statement();
+
+  cg_epilogue();
 
   if (--g.depth < 0) {
     error("nesting depth fell below 0");
@@ -158,6 +207,40 @@ void expression() {
   }
 }
 
+void symcheck(int check) {
+  SymTableEntry* curr = head;
+  SymTableEntry* ret = nullptr;
+
+  while (curr != nullptr) {
+    if (!strcmp(g.token, curr->name)) {
+      ret = curr;
+    }
+    curr = curr->next;
+  }
+
+  if (ret == nullptr) {
+    error("undefined symbol: %s", g.token);
+  }
+
+  switch (check) {
+    case CHECK_LSH:
+      if (ret->type != TOK_VAR) {
+        error("must be a variable: %s", g.token);
+      }
+      break;
+    case CHECK_RHS:
+      if (ret->type == TOK_PROCEDURE) {
+        error("must not a procedure: %s", g.token);
+      }
+      break;
+    case CHECK_CALL:
+      if (ret->type != TOK_PROCEDURE) {
+        error("must be a procedure: %s", g.token);
+      }
+      break;
+  }
+}
+
 void parse() {
   next();
   block();
@@ -166,4 +249,6 @@ void parse() {
   if (g.type != 0) {
     error("extra tokens at the end of file");
   }
+
+  cg_end();
 }
